@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PizzeriaCleacCodeIths", "PizzeriaCleacCodeIths\PizzeriaCleacCodeIths.csproj", "{6010F32F-0BB4-4504-8205-1D335FAF392D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6010F32F-0BB4-4504-8205-1D335FAF392D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6010F32F-0BB4-4504-8205-1D335FAF392D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6010F32F-0BB4-4504-8205-1D335FAF392D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6010F32F-0BB4-4504-8205-1D335FAF392D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1EE80A62-F71E-40B3-BD60-ABB7968F9E59}
+	EndGlobalSection
+EndGlobal
