@@ -20,7 +20,7 @@
     "PizzeriaCleacCodeIths": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "weatherforecast",
+      "launchUrl": "orders",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
