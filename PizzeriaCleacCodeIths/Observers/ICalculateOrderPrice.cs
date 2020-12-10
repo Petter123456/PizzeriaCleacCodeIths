@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace PizzeriaCleacCodeIths.Observers
 {
-    public interface IObserver
+    public interface ICalculateOrderPrice
     {
-        void update(Order order);
+        int CalculateTotalOrderPrice(Order order);
     }
 }

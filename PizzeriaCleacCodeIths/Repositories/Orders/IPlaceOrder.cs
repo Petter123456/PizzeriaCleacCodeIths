@@ -1,9 +1,10 @@
 ﻿using PizzeriaCleacCodeIths.Models;
+using System.Collections.Generic;
 
 namespace PizzeriaCleacCodeIths.Repositories
 {
     public interface IPlaceOrder
     {
-        Order ReciveOrder(PlacedPizzaOrder placedOrder, PlacedDrinksOrder placedDrinksOrder, PlacedExtraIngredientsOrder placedExtraIngredients);
+        List<Order> ReciveOrder(PlacedPizzaOrder placedOrder, PlacedDrinksOrder placedDrinksOrder, PlacedExtraIngredientsOrder placedExtraIngredients);
     }
 }

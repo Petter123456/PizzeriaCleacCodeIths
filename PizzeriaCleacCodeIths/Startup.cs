@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using PizzeriaCleacCodeIths.AutoMapper;
+using PizzeriaCleacCodeIths.Data;
+using PizzeriaCleacCodeIths.Observers;
 using PizzeriaCleacCodeIths.Repositories;
 
 namespace PizzeriaCleacCodeIths
@@ -25,6 +27,8 @@ namespace PizzeriaCleacCodeIths
             ConfigureSwagger(services); 
             services.AddControllers();
             services.AddScoped<IPlaceOrder, PlaceOrder>();
+            services.AddScoped<ICalculateOrderPrice, CalculateOrderPrice>();
+            services.AddScoped<IMenu, Menu>();
 
             // Auto Mapper Configurations
             var mapperConfig = new MapperConfiguration(mc =>

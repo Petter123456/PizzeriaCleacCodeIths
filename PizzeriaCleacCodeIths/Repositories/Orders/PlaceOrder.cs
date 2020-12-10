@@ -1,54 +1,60 @@
 ﻿using PizzeriaCleacCodeIths.Data;
 using PizzeriaCleacCodeIths.Models;
 using PizzeriaCleacCodeIths.Observers;
+using PizzeriaCleacCodeIths.Repositories.CalculatePrice;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace PizzeriaCleacCodeIths.Repositories
 {
-    public class PlaceOrder : IPlaceOrder
+    public class PlaceOrder : IPlaceOrder , IAcceptVisitor
     {
         private List<Pizza> validPizzas = new List<Pizza>();
         private List<Drinks> validDrinks = new List<Drinks>();
         private List<ExtraIngredients> validExtraIngredients = new List<ExtraIngredients>();
-        private List<Pizza> pizzas;
-        private List<Drinks> drinks;
-        private List<ExtraIngredients> extraIngredients;
         public Order order = new Order();
+        private List<Order> allOrders;
 
-        public Order ReciveOrder(PlacedPizzaOrder placedPizzaOrder, PlacedDrinksOrder placedDrinksOrder, PlacedExtraIngredientsOrder placedExtraIngredientsOrder)
+        public ICalculateOrderPrice _calculateOrderPrice { get; }
+        public IMenu _menu { get; }
+
+        public PlaceOrder(ICalculateOrderPrice calculateOrderPrice, IMenu menu)
         {
-            pizzas = ValidatePizza(placedPizzaOrder);
-            drinks = ValidateDrinks(placedDrinksOrder);
-            extraIngredients = ValidateExtraIngredients(placedExtraIngredientsOrder);
+            _calculateOrderPrice = calculateOrderPrice;
+            _menu = menu;
+        }
+
+        public List<Order> ReciveOrder(PlacedPizzaOrder placedPizzaOrder, PlacedDrinksOrder placedDrinksOrder, PlacedExtraIngredientsOrder placedExtraIngredientsOrder)
+        {
+           var pizzas = ValidatePizza(placedPizzaOrder);
+           var drinks = ValidateDrinks(placedDrinksOrder);
+           var extraIngredients = ValidateExtraIngredients(placedExtraIngredientsOrder);
 
             order.Pizzas = pizzas;
             order.Drinks = drinks;
             order.ExtraIngredients = extraIngredients;
+            order.TotalPrice = GetOrderPrice(_calculateOrderPrice);
 
-            return order;
-            //var x = Menu.Pizzas.Any(x => x.Key == order.);
-            //ICalculatePrice calculatePrice = new CalculatePrice(); 
-            //var observer = new Observer(order,calculatePrice);
-            //observer.update(order);
-
+            allOrders = _menu.GetListOfOrders(order);
+            
+            return allOrders;
         }
 
         private List<ExtraIngredients> ValidateExtraIngredients(PlacedExtraIngredientsOrder placedExtraIngredientsOrder)
         {
             foreach (var product in placedExtraIngredientsOrder.ExtraIngredientsName)
             {
-                if (!Menu.ExtraIngredients.Any(p => p.Key.Contains(product)))
+                if (!_menu.ExtraIngredientsWithPrices.Any(p => p.Key.Contains(product)))
                 {
-                    throw new ArgumentException("Wrong input");
+                    throw new ArgumentException("Invalid input for Extra Ingredients. Ingredients is not availible on menu");
                 }
                 else
                 {
                     var extraIngredient = new ExtraIngredients()
                     {
                         Name = product,
-                        Price = Menu.Prices[product],
+                        Price = _menu.Prices[product],
                     };
                     validExtraIngredients.Add(extraIngredient);
                 }
@@ -60,16 +66,16 @@ namespace PizzeriaCleacCodeIths.Repositories
         {
             foreach (var product in placedDrinksOrder.DrinksName)
             {
-                if (!Menu.Drinks.Any(p => p.Key.Equals(product)))
+                if (!_menu.DrinksWithPrices.Any(p => p.Key.Equals(product)))
                 {
-                    throw new ArgumentException("Wrong input");
+                    throw new ArgumentException("Invalid input for drinks. Drink is not availible on menu");
                 }
                 else
                 {
                     var drink = new Drinks()
                     {
                         Name = product,
-                        Price = Menu.Prices[product],
+                        Price = _menu.Prices[product],
                     };
                     validDrinks.Add(drink);
                 }
@@ -81,17 +87,17 @@ namespace PizzeriaCleacCodeIths.Repositories
         {
             foreach (var product in placedOrder.PizzasName)
             {
-                if (!Menu.Pizzas.Any(p => p.Key.Equals(product)))
+                if (!_menu.PizzasWithIngredients.Any(p => p.Key.Equals(product)))
                 {
-                    throw new ArgumentException("Wrong input");
+                    throw new ArgumentException("Invalid input for pizza. Pizza is not availible on menu");
                 }
                 else
                 {
                     var pizza = new Pizza()
                     {
                         Name = product,
-                        Price = Menu.Prices[product],
-                        Ingredients = Menu.Pizzas[product]
+                        Price = _menu.Prices[product],
+                        Ingredients = _menu.PizzasWithIngredients[product]
                     };
                     validPizzas.Add(pizza);
                 }
@@ -99,6 +105,9 @@ namespace PizzeriaCleacCodeIths.Repositories
             return validPizzas;
         }
 
-
+        public int GetOrderPrice(ICalculateOrderPrice calculatePrice)
+        {
+           return calculatePrice.CalculateTotalOrderPrice(this.order);
+        }
     }
 }
