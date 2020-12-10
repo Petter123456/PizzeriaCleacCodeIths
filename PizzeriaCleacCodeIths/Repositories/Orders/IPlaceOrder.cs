@@ -4,6 +4,6 @@ namespace PizzeriaCleacCodeIths.Repositories
 {
     public interface IPlaceOrder
     {
-        void ReciveOrder(Pizzas pizza, Drinks drinks, ExtraIngredients extras);
+        Order ReciveOrder(PlacedPizzaOrder placedOrder, PlacedDrinksOrder placedDrinksOrder, PlacedExtraIngredientsOrder placedExtraIngredients);
     }
 }

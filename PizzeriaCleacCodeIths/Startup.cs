@@ -34,6 +34,7 @@ namespace PizzeriaCleacCodeIths
 
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
+            services.AddMvc();
         }
 
         private static void ConfigureSwagger(IServiceCollection services)

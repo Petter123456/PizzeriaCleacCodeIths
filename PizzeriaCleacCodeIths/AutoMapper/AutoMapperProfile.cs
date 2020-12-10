@@ -12,7 +12,7 @@ namespace PizzeriaCleacCodeIths.AutoMapper
         public AutoMapperProfile()
         {
             var config = new MapperConfiguration(cfg => {
-                cfg.CreateMap<string[], Pizzas>();
+                cfg.CreateMap<string[], PlacedPizzaOrder>();
             });
         }
  

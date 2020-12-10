@@ -32,14 +32,11 @@ namespace PizzeriaCleacCodeIths.Controllers
 
         // POST: Orders/Create
         [HttpPost ("Create")]
-        public ActionResult Create(string[] pizza, string[] drinks, string[] extras)
+        public ActionResult Create(PlacedPizzaOrder placedPizzaOrder, PlacedDrinksOrder placedDrinksOrder, PlacedExtraIngredientsOrder placedExtraIngredients)
         {
             try
             {
-                var pizzas = _mapper.Map(pizza, new Pizzas());
-                var beverages = _mapper.Map(drinks, new Drinks());
-                var extraIngredients = _mapper.Map(extras, new ExtraIngredients());
-                _placeOrder.ReciveOrder(pizzas, beverages, extraIngredients);
+                _placeOrder.ReciveOrder(placedPizzaOrder, placedDrinksOrder, placedExtraIngredients);
 
                 return Ok(); 
             }
