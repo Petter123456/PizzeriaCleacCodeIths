@@ -1,11 +1,17 @@
 ﻿using PizzeriaCleacCodeIths.Models;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PizzeriaCleacCodeIths.Data
 {
     public sealed class Menu : IMenu
     {
-        private static Menu instance = null; 
+        private static Menu instance = null;
+        private IEnumerable<OrderDto> order;
+        //public List<OrderDto> Orders => new List<OrderDto>();
+        public static List<OrderDto> Orders { get; set; }
+  
         public static Menu GetInstance
         {
             get
@@ -17,13 +23,13 @@ namespace PizzeriaCleacCodeIths.Data
         }
 
         Dictionary<string, int> IMenu.Prices => new Dictionary<string, int> {
-            {"Margarita", 85},
-            {"Hawaii", 95},
-            {"KebabPizza", 105},
-            {"QuatroStagioni", 115},
-            {"CocaCola", 20},
-            {"Fanta", 20},
-            {"Sprite", 25},
+            {"margarita", 85},
+            {"hawaii", 95},
+            {"kebabPizza", 105},
+            {"cuatrostagioni", 115},
+            {"cocacola", 20},
+            {"fanta", 20},
+            {"sprite", 25},
             {"skinka", 10},
             {"ananas", 10},
             {"champinjoner", 10},
@@ -41,75 +47,59 @@ namespace PizzeriaCleacCodeIths.Data
 
         public Dictionary<string, string> PizzasWithIngredients => new Dictionary<string, string>
         {
-            { "Margarita", "Ost,Tomatsås" },
-            { "Hawaii", "Ost, tomatsås, skinka, ananas" },
-            { "KebabPizza", "- Ost, tomatsås, kebab, champinjoner, lök, feferoni, isbergssallad, tomatkebabsås" },
-            { "QuatroStagioni", "Ost, tomatsås, skinka, räkor, musslor, champinjoner, kronärtskocka" }
+            { "margarita", "Ost,Tomatsås" },
+            { "hawaii", "Ost, tomatsås, skinka, ananas" },
+            { "kebabPizza", "- Ost, tomatsås, kebab, champinjoner, lök, feferoni, isbergssallad, tomatkebabsås" },
+            { "quatrostagioni", "Ost, tomatsås, skinka, räkor, musslor, champinjoner, kronärtskocka" }
         };
 
         public Dictionary<string, int> ExtraIngredientsWithPrices => new Dictionary<string, int>
         {
-            { "Skinka, ananas, champinjoner, lök, kebabsås", 10 },
-            { "Räkor, musslor, kronärtskocka", 15 },
-            { "Kebab, koriander", 20 },
+            { "skinka, ananas, champinjoner, lök, kebabsås", 10 },
+            { "räkor, musslor, kronärtskocka", 15 },
+            { "kebab, koriander", 20 },
         };
 
         public Dictionary<string, int> DrinksWithPrices => new Dictionary<string, int>
         {
-            { "CocaCola", 20 },
-            { "Fanta", 20 },
-            { "Sprite", 25 },
+            { "cocacola", 20 },
+            { "fanta", 20 },
+            { "sprite", 25 },
         };
 
-        public static List<Order> orders = new List<Order>();
 
-        //public static readonly Dictionary<string, int> Prices = new Dictionary<string, int> {
-        //    {"Margarita", 85},
-        //    {"Hawaii", 95},
-        //    {"KebabPizza", 105},
-        //    {"QuatroStagioni", 115},
-        //    {"CocaCola", 20},
-        //    {"Fanta", 20},
-        //    {"Sprite", 25},
-        //    {"skinka", 10},
-        //    {"ananas", 10},
-        //    {"champinjoner", 10},
-        //    {"lök", 10},
-        //    {"kebabsås", 10},
-        //    {"räkor", 15},
-        //    {"musslor", 15},
-        //    {"kronärtskocka", 15},
-        //    {"kebab", 20},
-        //    {"koriander", 20},
-        //    {"CheapExtras", 10},
-        //    {"MidPriceExtras", 15},
-        //    {"HighPriceExtras", 20}
-        //};
-
-        //public static readonly Dictionary<string, string> Pizzas = new Dictionary<string, string>
-        //{
-        //    { "Margarita", "Ost,Tomatsås" },
-        //    { "Hawaii", "Ost, tomatsås, skinka, ananas" },
-        //    { "KebabPizza", "- Ost, tomatsås, kebab, champinjoner, lök, feferoni, isbergssallad, tomatkebabsås" },
-        //    { "QuatroStagioni", "Ost, tomatsås, skinka, räkor, musslor, champinjoner, kronärtskocka" }
-        //};
-        //public static readonly Dictionary<string, int> ExtraIngredients = new Dictionary<string, int>
-        //{
-        //    { "Skinka, ananas, champinjoner, lök, kebabsås", Prices["CheapExtras"] },
-        //    { "Räkor, musslor, kronärtskocka", (int) Prices["MidPriceExtras"] },
-        //    { "Kebab, koriander", (int) Prices["HighPriceExtras"] },
-        //};
-        //public static readonly Dictionary<string, int> Drinks = new Dictionary<string, int>
-        //{
-        //    { "CocaCola", (int) Prices["CocaCola"] },
-        //    { "Fanta", (int) Prices["Fanta"] },
-        //    { "Sprite", (int) Prices["Sprite"] },
-        //};
-
-        public List<Order> GetListOfOrders(Order order)
+        public List<OrderDto> GetListOfOrders(OrderDto order)
         {
-            orders.Add(order);
-            return orders; 
+            if (Orders == null)
+            {
+                Orders = new List<OrderDto>(); 
+            }
+
+            Orders.Add(order);
+            
+            return Orders; 
+        }
+        public OrderDto EditOrderDto(Guid id, OrderDto orderChanged)
+        {
+            var orderDto = Orders[Orders.FindIndex(id => id.Id.Equals(id))] = orderChanged;
+
+            return orderDto;
+        }
+        public List<OrderDto> DeleteOrderDto(Guid id)
+        {
+
+            var order = Orders.Where(order => order.Id == id).SingleOrDefault();
+
+            if (order != null)
+            {
+                Orders.Remove(order); 
+            }
+            else
+            {
+                throw new ArgumentException("No order with the id you entered was found");
+            }
+
+            return Orders;
         }
     }
 }

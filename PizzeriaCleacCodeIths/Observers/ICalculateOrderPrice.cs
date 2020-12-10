@@ -8,6 +8,6 @@ namespace PizzeriaCleacCodeIths.Observers
 {
     public interface ICalculateOrderPrice
     {
-        int CalculateTotalOrderPrice(Order order);
+        int CalculateTotalOrderPrice(OrderDto order);
     }
 }

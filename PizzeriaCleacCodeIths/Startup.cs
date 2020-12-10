@@ -26,7 +26,7 @@ namespace PizzeriaCleacCodeIths
         {
             ConfigureSwagger(services); 
             services.AddControllers();
-            services.AddScoped<IPlaceOrder, PlaceOrder>();
+            services.AddScoped<IOrder, Order>();
             services.AddScoped<ICalculateOrderPrice, CalculateOrderPrice>();
             services.AddScoped<IMenu, Menu>();
 

@@ -14,13 +14,13 @@ namespace PizzeriaCleacCodeIths.Observers
         private int totalExtraIngredientsPrice;
         private int totalOrderPrice;
 
-        public Order Order { get; }
+        public Models.OrderDto Order { get; }
 
         public CalculateOrderPrice()
         {
            
         }
-        public int CalculateTotalOrderPrice(Order order)
+        public int CalculateTotalOrderPrice(Models.OrderDto order)
         {
             var pizzasPrice = CalculatePizzaPrice(order.Pizzas);
             var drinksPrice = CalculateDrinksPrice(order.Drinks);

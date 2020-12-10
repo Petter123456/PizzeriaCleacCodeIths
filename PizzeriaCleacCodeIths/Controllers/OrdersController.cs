@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PizzeriaCleacCodeIths.Data;
 using PizzeriaCleacCodeIths.Models;
 using PizzeriaCleacCodeIths.Repositories;
 using System;
@@ -13,24 +14,43 @@ namespace PizzeriaCleacCodeIths.Controllers
 {
     public class OrdersController : Controller
     {
-        private List<Order> order;
+        private List<Models.OrderDto> orders;
+        private List<OrderDto> allOrders;
+        private OrderDto order;
 
-        public IPlaceOrder _placeOrder { get; }
+        public IOrder _placeOrder { get; }
         public IMapper _mapper { get; }
-        public List<Order> EmptyResult { get; private set; }
+        public IMenu _menu { get; }
+        public List<Models.OrderDto> EmptyResult { get; private set; }
 
-        public OrdersController(IPlaceOrder placeOrder, IMapper mapper)
+        public OrdersController(IOrder placeOrder, IMenu menu)
         {
             _placeOrder = placeOrder;
-            _mapper = mapper;
+            _menu = menu;
         }
 
         // GET: Orders
         [HttpGet ("Get")]
-        public ActionResult Index()
+        [ProducesResponseType(typeof(List<Models.OrderDto>), (int)HttpStatusCode.OK)]
+        public IActionResult Index()
         {
-            return View();
+            try
+            {
+                orders = Menu.Orders;
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+            return orders != null ? Ok(orders) : (IActionResult) Result(HttpStatusCode.NoContent, "No Orders has been placed");
         }
+
+        private static IActionResult Result(HttpStatusCode statusCode, string reason) => new ContentResult
+        {
+            StatusCode = (int)statusCode,
+            Content = $"Status Code: {(int)statusCode}; {statusCode}; {reason}",
+            ContentType = "text/plain",
+        };
 
         // GET: Orders/Details/5
         public ActionResult Details(int id)
@@ -39,54 +59,56 @@ namespace PizzeriaCleacCodeIths.Controllers
         }
 
         // POST: Orders/Create
-        [HttpPost ("Create")]
-        [ProducesResponseType(typeof(List<Order>), (int) HttpStatusCode.OK)]
-        public async Task<IActionResult> Create(PlacedPizzaOrder placedPizzaOrder, PlacedDrinksOrder placedDrinksOrder, PlacedExtraIngredientsOrder placedExtraIngredients)
+        [HttpPost("Create")]
+        [ProducesResponseType(typeof(List<OrderDto>), (int)HttpStatusCode.OK)]
+        public IActionResult Create(PizzaOrderRequest pizzas, DrinksOrderRequest drinks, ExtraIngredientsOrderRequest ExtraIngredients)
         {
             try
             {
-               order = _placeOrder.ReciveOrder(placedPizzaOrder, placedDrinksOrder, placedExtraIngredients);         
+                orders = _placeOrder.HandleRequest(pizzas, drinks, ExtraIngredients);
             }
             catch (ArgumentException e)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, e.Message);
             }
-            return order.Any() ? Ok(order) : (IActionResult) StatusCode(StatusCodes.Status204NoContent);
+            return orders.Any() ? Ok(orders) : (IActionResult)StatusCode(StatusCodes.Status204NoContent);
         }
 
         // POST: Orders/Edit/5
         [HttpPut ("Edit")]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, Order order)
+        [ProducesResponseType(typeof(OrderDto), (int)HttpStatusCode.OK)]
+        public IActionResult Edit(Guid id, PizzaOrderRequest pizzas, DrinksOrderRequest drinks, ExtraIngredientsOrderRequest extraIngredients, bool orderHandled)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                order = _placeOrder.ValidateOrderChangeRequest(id, pizzas, drinks, extraIngredients, orderHandled);
             }
-            catch
+            catch (ArgumentException e)
             {
-                return View();
+                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
             }
+            return order != null ? Ok(order) : (IActionResult)StatusCode(StatusCodes.Status204NoContent);
+
         }
 
         // POST: Orders/Delete/5
         [HttpDelete ("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        [ProducesResponseType(typeof(List<OrderDto>), (int)HttpStatusCode.OK)]
+        public IActionResult Delete(Guid id)
         {
-            
             try
             {
-                return RedirectToAction(nameof(Index));
+                orders = _menu.DeleteOrderDto(id); 
             }
-            catch
+            catch (ArgumentException e)
             {
-                return View();
+                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
             }
+            return orders.Any() ? Ok(orders) : (IActionResult)StatusCode(StatusCodes.Status204NoContent);
         }
 
         [HttpPost("Approve")]
-        [ValidateAntiForgeryToken]
+        [ProducesResponseType(typeof(List<OrderDto>), (int)HttpStatusCode.OK)]
         public ActionResult Approve(int id, bool approve)
         {
             try
