@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PizzeriaCleacCodeIths</name>
+    </assembly>
+    <members>
+        <member name="M:PizzeriaCleacCodeIths.Controllers.OrdersController.Index">
+            <summary>Returns a list of non-approved orders in the system
+            </summary>
+        </member>
+        <member name="M:PizzeriaCleacCodeIths.Controllers.OrdersController.Create(PizzeriaCleacCodeIths.Models.OrderRequestModel)">
+            <summary>Creates a new order in the system.
+            Only accepts Items from the menu, the menu is:
+            Pizzas: margarita,hawaii,kebabpizza,cuatrostagioni.
+            Drinks:cocacola,fanta,sprite.
+            Extra Ingredientsskinka,ananas,champinjoner,lök,kebabsås,räkor,musslor,kronärtskocka,kebab,koriander.
+            </summary>
+        </member>
+        <member name="M:PizzeriaCleacCodeIths.Controllers.OrdersController.Edit(System.Guid,PizzeriaCleacCodeIths.Models.OrderRequestModel,System.Boolean)">
+            <summary>Modifies an exisiting order in the system.
+            If the order status of the order is to be changed leave pizzas, drinks and extra ingredients blank. 
+            </summary>
+        </member>
+        <member name="M:PizzeriaCleacCodeIths.Controllers.OrdersController.Delete(System.Guid)">
+            <summary>Deletes an order from the system. 
+            </summary>
+        </member>
+    </members>
+</doc>

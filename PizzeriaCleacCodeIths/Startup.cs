@@ -5,10 +5,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using PizzeriaCleacCodeIths.AutoMapper;
-using PizzeriaCleacCodeIths.Data;
-using PizzeriaCleacCodeIths.Observers;
-using PizzeriaCleacCodeIths.Repositories;
+using System;
+using System.IO;
+using System.Reflection;
+using PizzeriaCleacCodeIths.Data.Menu;
+using PizzeriaCleacCodeIths.Orders;
+using PizzeriaCleacCodeIths.PricesCalculation;
 
 namespace PizzeriaCleacCodeIths
 {
@@ -25,27 +27,27 @@ namespace PizzeriaCleacCodeIths
         public void ConfigureServices(IServiceCollection services)
         {
             ConfigureSwagger(services); 
-            services.AddControllers();
+            services.AddControllers(x => x.AllowEmptyInputInBodyModelBinding = true);
             services.AddScoped<IOrder, Order>();
             services.AddScoped<ICalculateOrderPrice, CalculateOrderPrice>();
             services.AddScoped<IMenu, Menu>();
-
-            // Auto Mapper Configurations
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new AutoMapperProfile());
-            });
-
-            IMapper mapper = mapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            services.AddScoped<IValidate, Validate>();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddMvc();
         }
 
         private static void ConfigureSwagger(IServiceCollection services)
         {
+
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.XML";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+                c.IncludeXmlComments(xmlPath);
             });
         } 
 

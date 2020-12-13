@@ -1,124 +1,135 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PizzeriaCleacCodeIths.Data;
 using PizzeriaCleacCodeIths.Models;
-using PizzeriaCleacCodeIths.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
+using PizzeriaCleacCodeIths.Data.Menu;
+using PizzeriaCleacCodeIths.Dto;
+using PizzeriaCleacCodeIths.Orders;
 
 namespace PizzeriaCleacCodeIths.Controllers
 {
     public class OrdersController : Controller
     {
-        private List<Models.OrderDto> orders;
-        private List<OrderDto> allOrders;
-        private OrderDto order;
+        public List<OrderDto> orders;
+        public OrderDto order;
 
-        public IOrder _placeOrder { get; }
-        public IMapper _mapper { get; }
-        public IMenu _menu { get; }
-        public List<Models.OrderDto> EmptyResult { get; private set; }
+        public IOrder Order { get; }
+        public IMenu _Menu { get; }
 
-        public OrdersController(IOrder placeOrder, IMenu menu)
+        public OrdersController(IOrder order, IMenu menu)
         {
-            _placeOrder = placeOrder;
-            _menu = menu;
+            Order = order;
+            _Menu = menu;
         }
 
         // GET: Orders
+        /// <summary>Returns a list of non-approved orders in the system
+        /// </summary>
         [HttpGet ("Get")]
-        [ProducesResponseType(typeof(List<Models.OrderDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(List<OrderDto>), (int)HttpStatusCode.OK)]
         public IActionResult Index()
         {
             try
             {
-                orders = Menu.Orders;
+                orders = Menu.Orders.Where(order => order.Approved = false).ToList();
             }
             catch (Exception e)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
-            return orders != null ? Ok(orders) : (IActionResult) Result(HttpStatusCode.NoContent, "No Orders has been placed");
+            return orders != null ? Ok(orders) : Result(HttpStatusCode.NoContent, "No Orders has been placed");
         }
 
         private static IActionResult Result(HttpStatusCode statusCode, string reason) => new ContentResult
         {
+            ContentType = $"{reason},   Status Code: {(int)statusCode} {statusCode}",
+            Content = $"{reason},  Status Code: {(int)statusCode} {statusCode}",
             StatusCode = (int)statusCode,
-            Content = $"Status Code: {(int)statusCode}; {statusCode}; {reason}",
-            ContentType = "text/plain",
         };
 
-        // GET: Orders/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
 
         // POST: Orders/Create
+        /// <summary>Creates a new order in the system.
+        /// Only accepts Items from the menu, the menu is:
+        /// Pizzas: margarita,hawaii,kebabpizza,cuatrostagioni.
+        /// Drinks:cocacola,fanta,sprite.
+        /// Extra Ingredientsskinka,ananas,champinjoner,lök,kebabsås,räkor,musslor,kronärtskocka,kebab,koriander.
+        /// </summary>
         [HttpPost("Create")]
         [ProducesResponseType(typeof(List<OrderDto>), (int)HttpStatusCode.OK)]
-        public IActionResult Create(PizzaOrderRequest pizzas, DrinksOrderRequest drinks, ExtraIngredientsOrderRequest ExtraIngredients)
+        public IActionResult Create(OrderRequestModel orderRequestModel)
         {
             try
             {
-                orders = _placeOrder.HandleRequest(pizzas, drinks, ExtraIngredients);
+                orders = Order.HandleRequest(orderRequestModel);
             }
-            catch (ArgumentException e)
+            catch (AggregateException e)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
+                return Result(HttpStatusCode.BadRequest, e.Message);
             }
-            return orders.Any() ? Ok(orders) : (IActionResult)StatusCode(StatusCodes.Status204NoContent);
+            catch (NullReferenceException e)
+            {
+                return Result(HttpStatusCode.NoContent, e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+
+            return Ok(orders); 
         }
 
         // POST: Orders/Edit/5
+        /// <summary>Modifies an exisiting order in the system.
+        /// If the order status of the order is to be changed leave pizzas, drinks and extra ingredients blank. 
+        /// </summary>
         [HttpPut ("Edit")]
         [ProducesResponseType(typeof(OrderDto), (int)HttpStatusCode.OK)]
-        public IActionResult Edit(Guid id, PizzaOrderRequest pizzas, DrinksOrderRequest drinks, ExtraIngredientsOrderRequest extraIngredients, bool orderHandled)
+        public IActionResult Edit(Guid id, OrderRequestModel orderRequestModel, bool orderHandled)
         {
             try
             {
-                order = _placeOrder.ValidateOrderChangeRequest(id, pizzas, drinks, extraIngredients, orderHandled);
+                order = Order.ChangeOrderRequest(id, orderRequestModel, orderHandled);
             }
-            catch (ArgumentException e)
+            catch (AggregateException e)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
+                return Result(HttpStatusCode.BadRequest, e.Message);
             }
-            return order != null ? Ok(order) : (IActionResult)StatusCode(StatusCodes.Status204NoContent);
-
+            catch (NullReferenceException e)
+            {
+                return Result(HttpStatusCode.NoContent, e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+            return order != null ? Ok(order) : Result(HttpStatusCode.NoContent, "Please enter valid options from the menu");
         }
 
         // POST: Orders/Delete/5
+        /// <summary>Deletes an order from the system. 
+        /// </summary>
         [HttpDelete ("Delete")]
         [ProducesResponseType(typeof(List<OrderDto>), (int)HttpStatusCode.OK)]
         public IActionResult Delete(Guid id)
         {
             try
             {
-                orders = _menu.DeleteOrderDto(id); 
+                orders = _Menu.DeleteOrderDto(id);
             }
             catch (ArgumentException e)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
+                return Result(HttpStatusCode.BadRequest, e.Message);
             }
-            return orders.Any() ? Ok(orders) : (IActionResult)StatusCode(StatusCodes.Status204NoContent);
-        }
-
-        [HttpPost("Approve")]
-        [ProducesResponseType(typeof(List<OrderDto>), (int)HttpStatusCode.OK)]
-        public ActionResult Approve(int id, bool approve)
-        {
-            try
+            catch (Exception e)
             {
-                return RedirectToAction(nameof(Index));
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
-            catch
-            {
-                return View();
-            }
+            return orders.Any() ? Ok(orders) : Result(HttpStatusCode.NoContent, "order was deleted");
         }
     }
 }

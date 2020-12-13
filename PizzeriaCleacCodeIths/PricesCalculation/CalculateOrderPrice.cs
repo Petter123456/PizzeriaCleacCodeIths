@@ -1,11 +1,8 @@
-﻿using PizzeriaCleacCodeIths.Models;
-using PizzeriaCleacCodeIths.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using PizzeriaCleacCodeIths.Dto;
+using PizzeriaCleacCodeIths.Models;
 
-namespace PizzeriaCleacCodeIths.Observers
+namespace PizzeriaCleacCodeIths.PricesCalculation
 {
     public class CalculateOrderPrice : ICalculateOrderPrice
     {
@@ -13,25 +10,27 @@ namespace PizzeriaCleacCodeIths.Observers
         private int totalDrinksPrice;
         private int totalExtraIngredientsPrice;
         private int totalOrderPrice;
+        private int pizzasPrice = 0;
+        private int drinksPrice = 0;
+        private int extraIngredientsPrice = 0;
 
-        public Models.OrderDto Order { get; }
+        public int CalculateTotalOrderPrice(OrderDto order)
+        {
+            if (order.Pizzas != null) 
+                pizzasPrice = CalculatePizzaPrice(order.Pizzas);
 
-        public CalculateOrderPrice()
-        {
-           
-        }
-        public int CalculateTotalOrderPrice(Models.OrderDto order)
-        {
-            var pizzasPrice = CalculatePizzaPrice(order.Pizzas);
-            var drinksPrice = CalculateDrinksPrice(order.Drinks);
-            var extraIngredientsPrice = CalculateExtraIngredientsPrice(order.ExtraIngredients);
+            if (order.Drinks != null)
+                drinksPrice = CalculateDrinksPrice(order.Drinks);
+
+            if (order.ExtraIngredients != null)
+                extraIngredientsPrice = CalculateExtraIngredientsPrice(order.ExtraIngredients);
 
             totalOrderPrice = pizzasPrice + drinksPrice + extraIngredientsPrice;
             
             return totalOrderPrice; 
         }
 
-        public int CalculatePizzaPrice(List<Pizza> pizzas)
+        public int CalculatePizzaPrice(List<PizzaModel> pizzas)
         {
             foreach (var pizza in pizzas)
             {
@@ -40,7 +39,7 @@ namespace PizzeriaCleacCodeIths.Observers
             return totalPizzaPrice; 
         }
 
-        public int CalculateDrinksPrice(List<Drinks> drinks)
+        public int CalculateDrinksPrice(List<DrinksModel> drinks)
         {
             foreach (var drink in drinks)
             {
@@ -48,7 +47,7 @@ namespace PizzeriaCleacCodeIths.Observers
             }
             return totalDrinksPrice;
         }
-        public int CalculateExtraIngredientsPrice(List<ExtraIngredients> extraIngredients)
+        public int CalculateExtraIngredientsPrice(List<ExtraIngredientsModel> extraIngredients)
         {
             foreach (var extra in extraIngredients)
             {

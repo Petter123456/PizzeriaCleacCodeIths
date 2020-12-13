@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using PizzeriaCleacCodeIths.Models;
 
-namespace PizzeriaCleacCodeIths.Models
+namespace PizzeriaCleacCodeIths.Dto
 {
     public class OrderDto
     {
-        public Guid Id { get; } = Guid.NewGuid();
-        public List<Pizza> Pizzas { get; set; }
-        public List<ExtraIngredients> ExtraIngredients { get; set; }
-        public List<Drinks> Drinks { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public List<PizzaModel> Pizzas { get; set; }
+        public List<ExtraIngredientsModel?> ExtraIngredients { get; set; }
+        public List<DrinksModel> Drinks { get; set; }
         public int TotalPrice { get; set; }
         public bool Approved { get; set; } = false; 
     }

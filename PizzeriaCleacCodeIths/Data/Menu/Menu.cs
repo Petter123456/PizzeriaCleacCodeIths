@@ -1,24 +1,22 @@
-﻿using PizzeriaCleacCodeIths.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using PizzeriaCleacCodeIths.Dto;
 
-namespace PizzeriaCleacCodeIths.Data
+namespace PizzeriaCleacCodeIths.Data.Menu
 {
     public sealed class Menu : IMenu
     {
-        private static Menu instance = null;
-        private IEnumerable<OrderDto> order;
-        //public List<OrderDto> Orders => new List<OrderDto>();
+        private static Menu _instance = null;
         public static List<OrderDto> Orders { get; set; }
   
         public static Menu GetInstance
         {
             get
             {
-                if (instance == null)
-                    instance = new Menu();
-                return instance;
+                if (_instance == null)
+                    _instance = new Menu();
+                return _instance;
             }
         }
 
@@ -67,32 +65,45 @@ namespace PizzeriaCleacCodeIths.Data
             { "sprite", 25 },
         };
 
-
-        public List<OrderDto> GetListOfOrders(OrderDto order)
+        public OrderDto ApproveOrder(Guid id, in bool orderHandled)
         {
-            if (Orders == null)
+            var orderDto = Orders.SingleOrDefault(order => order.Id.Equals(id));
+
+            if (orderDto != null)
             {
-                Orders = new List<OrderDto>(); 
+                orderDto.Approved = orderHandled;
             }
-
-            Orders.Add(order);
-            
-            return Orders; 
-        }
-        public OrderDto EditOrderDto(Guid id, OrderDto orderChanged)
-        {
-            var orderDto = Orders[Orders.FindIndex(id => id.Id.Equals(id))] = orderChanged;
+            else
+            {
+                throw new ArgumentException("No orderDto with the id you entered was found");
+            }
 
             return orderDto;
         }
+
+
+        public List<OrderDto> GetListOfOrders(OrderDto order)
+        {
+            Orders ??= new List<OrderDto>();
+            Orders.Add(order);
+
+            var noneApprovedOrders = Orders.Where(order => order.Approved == false);
+
+            return noneApprovedOrders.ToList(); 
+        }
+        public OrderDto EditOrderDto(Guid id, OrderDto orderChanged)
+        {
+            var orderDtoIndex = Orders.FindIndex(x => x.Id.Equals((id)));
+            Orders[orderDtoIndex] = orderChanged; 
+            return Orders[orderDtoIndex];
+        }
         public List<OrderDto> DeleteOrderDto(Guid id)
         {
-
-            var order = Orders.Where(order => order.Id == id).SingleOrDefault();
+            var order = Orders.SingleOrDefault(order => order.Id == id);
 
             if (order != null)
             {
-                Orders.Remove(order); 
+                Orders.Remove(order);
             }
             else
             {
