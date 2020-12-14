@@ -35,7 +35,7 @@ namespace PizzeriaCleacCodeIths.Controllers
         {
             try
             {
-                orders = Menu.Orders.Where(order => order.Approved = false).ToList();
+                orders = _Menu.GetListOfOrders();
             }
             catch (Exception e)
             {
@@ -67,7 +67,7 @@ namespace PizzeriaCleacCodeIths.Controllers
             {
                 orders = Order.HandleRequest(orderRequestModel);
             }
-            catch (AggregateException e)
+            catch (ArgumentException e)
             {
                 return Result(HttpStatusCode.BadRequest, e.Message);
             }
@@ -95,7 +95,7 @@ namespace PizzeriaCleacCodeIths.Controllers
             {
                 order = Order.ChangeOrderRequest(id, orderRequestModel, orderHandled);
             }
-            catch (AggregateException e)
+            catch (ArgumentException e)
             {
                 return Result(HttpStatusCode.BadRequest, e.Message);
             }

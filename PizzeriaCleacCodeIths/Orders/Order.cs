@@ -16,7 +16,7 @@ namespace PizzeriaCleacCodeIths.Orders
         private List<PizzaModel> pizzas;
         private List<ExtraIngredientsModel> extraIngredients;
         private ICalculateOrderPrice CalculateOrderPrice { get; }
-        private IMenu Menu { get; }
+        public IMenu Menu { get; }
         private IValidate Validate { get; }
 
         public Order(ICalculateOrderPrice calculateOrderPrice, IMenu menu, IValidate validate)
@@ -32,7 +32,7 @@ namespace PizzeriaCleacCodeIths.Orders
 
             orderDto.TotalPrice = GetOrderPrice(CalculateOrderPrice, orderDto);
 
-            allOrders = Menu.GetListOfOrders(orderDto);
+            allOrders = Menu.AddToListOfOrders(orderDto);
 
             return allOrders;
         }
@@ -76,18 +76,18 @@ namespace PizzeriaCleacCodeIths.Orders
 
         public OrderDto ChangeOrderRequest(Guid id, OrderRequestModel orderRequestModel, bool orderHandled)
         {
-            if (orderRequestModel.Drinks != null && 
-                orderRequestModel.Pizzas != null && 
-                orderRequestModel.ExtraIngredients != null)
+            if (orderRequestModel.Drinks == null && 
+                orderRequestModel.Pizzas == null && 
+                orderRequestModel.ExtraIngredients == null)
+            {
+                return Menu.ApproveOrder(id, orderHandled);
+            }
+            else
             {
                 orderDto = RunInputValidation(orderRequestModel);
                 orderDto.Id = id;
                 orderDto.TotalPrice = GetOrderPrice(CalculateOrderPrice, orderDto);
                 orderDto.Approved = orderHandled;
-            }
-            else
-            {
-                return Menu.ApproveOrder(id, orderHandled);
             }
             return Menu.EditOrderDto(id, orderDto);
         }

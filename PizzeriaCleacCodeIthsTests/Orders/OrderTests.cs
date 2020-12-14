@@ -1,12 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PizzeriaCleacCodeIths.Orders;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
-using PizzeriaCleacCodeIths.Controllers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PizzeriaCleacCodeIths.Data.Menu;
 using PizzeriaCleacCodeIths.Dto;
 using PizzeriaCleacCodeIths.Models;
@@ -15,7 +11,7 @@ using PizzeriaCleacCodeIths.PricesCalculation;
 namespace PizzeriaCleacCodeIths.Orders.Tests
 {
     [TestClass()]
-    public class CreateOrderTests
+    public class OrderTests
     {
         [TestMethod()]
         public void HandleRequest_should_only_return_items_on_menu()
@@ -24,7 +20,7 @@ namespace PizzeriaCleacCodeIths.Orders.Tests
             var menu = new Menu();
             var validate = new Validate(menu);
             var calculatePrice = new CalculateOrderPrice();
-            var sut = new Order(calculatePrice,menu,validate);
+            var sut = new Order(calculatePrice, menu, validate);
             var orderRequest = new OrderRequestModel()
             {
                 Pizzas = new List<string>()
@@ -32,20 +28,11 @@ namespace PizzeriaCleacCodeIths.Orders.Tests
                     "bananpizza"
                 }
             };
-          
+
             //Act
             Action actual = () => sut.HandleRequest(orderRequest);
             //Assert
             actual.Should().Throw<ArgumentException>();
-            //  Det är möjligt att bara beställa läsk, men det behövs en grundpizza för att få beställa extra tillbehör
-
-            // lista med bara ej klara orders 
-
-            //create 
-            //edit
-            //Delete 
-            // Skriv in design patters i readme 
-
         }
 
         [TestMethod()]
@@ -114,6 +101,85 @@ namespace PizzeriaCleacCodeIths.Orders.Tests
             //Assert
             actual.Should().NotBeNull();
 
+        }
+        [TestMethod()]
+        public void OrderDto_should_only_change_approved_if_orderRequest_is_null()
+        {
+            //Arrange
+            var menu = new Menu();
+            var validate = new Validate(menu);
+            var calculatePrice = new CalculateOrderPrice();
+            var sut = new Order(calculatePrice, menu, validate);
+            var orderId = new Guid();
+            var orderDto = new OrderDto()
+            {
+                Id = orderId,
+                TotalPrice = 85,
+                Pizzas = new List<PizzaModel>()
+                {
+                    new PizzaModel()
+                    {
+                        Name = "margarita"
+                    }
+                },
+                Approved = false
+            };
+
+            Menu.Orders = new List<OrderDto>();
+            Menu.Orders.Add(orderDto);
+            var orderRequest = new OrderRequestModel()
+            {
+                Drinks = null,
+                Pizzas = null,
+                ExtraIngredients = null
+            };
+            //Act
+            var actual = sut.ChangeOrderRequest(orderId, orderRequest, true);
+            //Assert
+            actual.Approved.Should().BeTrue();
+            actual.Should().Be(orderDto);
+        }
+
+        [TestMethod()]
+        public void OrderDto_should_change_all_other_items_if_orderRequest_is_not_null()
+        {
+            //Arrange
+            var menu = new Menu();
+            var validate = new Validate(menu);
+            var calculatePrice = new CalculateOrderPrice();
+            var sut = new Order(calculatePrice, menu, validate);
+            var orderId = new Guid();
+            var orderDto = new OrderDto()
+            {
+                Id = orderId,
+                TotalPrice = 85,
+                Pizzas = new List<PizzaModel>()
+                {
+                    new PizzaModel()
+                    {
+                        Name = "margarita"
+                    }
+                },
+                Approved = false
+            };
+
+            Menu.Orders = new List<OrderDto>();
+            Menu.Orders.Add(orderDto);
+            var orderRequest = new OrderRequestModel()
+            {
+                Drinks = null,
+                Pizzas = new List<string>()
+                {
+                    "hawaii"
+                },
+                ExtraIngredients = null
+            };
+            //Act
+            var actual = sut.ChangeOrderRequest(orderId, orderRequest, false);
+            //Assert
+            actual.Approved.Should().BeFalse();
+            actual.Pizzas.First().Name.Should().Be(orderRequest.Pizzas.First());
+            actual.Pizzas.First().Ingredients.Should().NotBeNull();
         }
     }
 }

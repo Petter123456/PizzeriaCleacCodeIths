@@ -81,15 +81,18 @@ namespace PizzeriaCleacCodeIths.Data.Menu
             return orderDto;
         }
 
+        public List<OrderDto> GetListOfOrders()
+        {
+            Orders = Menu.Orders.Where(order => order.Approved == false).ToList();
+            return Orders; 
+        }
 
-        public List<OrderDto> GetListOfOrders(OrderDto order)
+        public List<OrderDto> AddToListOfOrders(OrderDto order)
         {
             Orders ??= new List<OrderDto>();
             Orders.Add(order);
 
-            var noneApprovedOrders = Orders.Where(order => order.Approved == false);
-
-            return noneApprovedOrders.ToList(); 
+            return Orders; 
         }
         public OrderDto EditOrderDto(Guid id, OrderDto orderChanged)
         {
@@ -99,6 +102,7 @@ namespace PizzeriaCleacCodeIths.Data.Menu
         }
         public List<OrderDto> DeleteOrderDto(Guid id)
         {
+
             var order = Orders.SingleOrDefault(order => order.Id == id);
 
             if (order != null)
